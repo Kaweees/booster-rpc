@@ -1,0 +1,19 @@
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"
+
+[project]
+name = "booster_rpc"
+version = "0.0.1"
+description = "Booster RPC"
+authors = [
+  { name = "Miguel Villa Floran", email = "miguel.villafloran@gmail.com" },
+]
+requires-python = ">=3.11,<3.14"
+readme = "README.md"
+license = { file = "LICENSE" }
+
+dependencies = ["numpy>=2.4.2", "opencv-python>=4.13.0.92", "protobuf>=6.33.5"]
+
+[dependency-groups]
+dev = ["pre-commit", "ipython"]
