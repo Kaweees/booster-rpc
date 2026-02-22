@@ -1,0 +1,66 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v6.0.0"
+    hooks:
+      # Basic safety checks
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-vcs-permalinks
+      - id: check-xml
+      - id: check-yaml
+        args: ["--allow-multiple-documents"]
+      - id: destroyed-symlinks
+      - id: check-shebang-scripts-are-executable
+
+      # Simple auto-fixers
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+      - id: pretty-format-json
+        args: ["--autofix"]
+      - id: requirements-txt-fixer
+      - id: sort-simple-yaml
+      - id: trailing-whitespace
+
+      # Quick correctness checks
+      - id: debug-statements
+      - id: name-tests-test
+
+      # Security checks (can also be placed last)
+      - id: detect-private-key
+      - id: forbid-new-submodules
+
+  - repo: https://github.com/PyCQA/autoflake
+    rev: "v2.3.1"
+    hooks:
+      - id: autoflake
+        args:
+          [
+            "--in-place",
+            "--remove-all-unused-imports",
+            "--remove-unused-variables",
+            "--recursive",
+          ]
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: "v3.21.2"
+    hooks:
+      - id: pyupgrade
+        args: ["--py310-plus", "--keep-runtime-typing"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.14.10"
+    hooks:
+      # Formatter first so code is canonicalized
+      - id: ruff-format
+      # Then linting + autofixes
+      - id: ruff
+        args: ["--output-format=full", "--fix", "--unsafe-fixes", "--config", "ruff.toml"]

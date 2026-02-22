@@ -1,0 +1,41 @@
+extend-exclude = [
+  "__pycache__",
+  "docs",
+  "site",
+  ".eggs",
+  ".git",
+  ".venv",
+  "build",
+  "dist",
+  "notebooks",
+  ".cache",
+]
+line-length = 120
+
+[lint]
+extend-select = [
+  # Ruff-specific rules
+  "RUF",
+]
+select = ["E", "F", "I"]
+
+ignore = [
+  "E402",   # Module level import not at top of file
+  "E501",   # Line too long
+  "E203",   # Whitespace before ':' -> conflicts with black
+  "D401",   # First line should be in imperative mood
+  "RET504", # Unnecessary variable assignment before return statement
+  "RET505", # Unnecessary elif after return statement
+  "SIM102", # Use a single if-statement instead of nested if-statements
+  "SIM117", # Merge with statements for context managers that have same scope
+  "SIM118", # Checks for key-existence checks against dict.keys() calls
+]
+
+[lint.isort]
+known-first-party = ["booster_rpc"]
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.mccabe]
+max-complexity = 30
