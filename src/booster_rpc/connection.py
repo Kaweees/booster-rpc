@@ -6,16 +6,17 @@ import base_pb2
 import rpc_pb2_grpc
 
 DEFAULT_IP = "10.0.0.185"
+DEFAULT_WS_PORT = 51111
 DEFAULT_GRPC_PORT = 50051
-
 
 class BoosterRPCConnection:
     """Base class for communicating with a Booster robot via gRPC RPC."""
 
-    def __init__(self, ip: str = DEFAULT_IP, port: int = DEFAULT_GRPC_PORT):
+    def __init__(self, ip: str = DEFAULT_IP, ws_port: int = DEFAULT_WS_PORT, grpc_port: int = DEFAULT_GRPC_PORT):
         self.ip = ip
-        self.port = port
-        self.channel = grpc.insecure_channel(f"{ip}:{port}")
+        self.ws_port = ws_port
+        self.grpc_port = grpc_port
+        self.channel = grpc.insecure_channel(f"{ip}:{grpc_port}")
         self.stub = rpc_pb2_grpc.RobotGrpcStub(self.channel)
 
     def _call(self, api_id: int, payload: bytes = b""):
