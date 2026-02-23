@@ -3,7 +3,7 @@ requires = ["uv_build"]
 build-backend = "uv_build"
 
 [project]
-name = "booster_rpc"
+name = "booster-rpc"
 version = "0.0.1"
 description = "Booster RPC"
 authors = [
@@ -12,8 +12,17 @@ authors = [
 requires-python = ">=3.11,<3.14"
 readme = "README.md"
 license = { file = "LICENSE" }
+keywords = ["robotics", "booster", "rpc"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
 
 dependencies = ["numpy>=2.4.2", "opencv-python>=4.13.0.92", "protobuf>=6.33.5"]
 
 [dependency-groups]
-dev = ["pre-commit", "ipython"]
+dev = ["ipykernel", "pre-commit"]
