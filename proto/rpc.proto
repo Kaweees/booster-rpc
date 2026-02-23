@@ -6,11 +6,11 @@ import "base.proto";
 import "entity.proto";
 
 enum RobotMode {
-  MODE_UNKNOWN = 0;
-  MODE_DAMPING = 1;
-  MODE_PREPARE = 2;
-  MODE_WALKING = 3;
-  MODE_CUSTOM = 4;
+  MODE_DAMPING = 0;
+  MODE_PREPARE = 1;
+  MODE_WALKING = 2;
+  MODE_CUSTOM = 3;
+  MODE_SOCCER = 4;
 }
 
 message GetRobotStatusRequest {
