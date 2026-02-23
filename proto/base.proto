@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package booster.proto;
+
+enum RpcApiId {
+  UNKNOWN_API_ID = 0;
+  GET_ROBOT_STATUS = 1000;
+  GET_ROBOT_PARAMS = 1001;
+  SET_ROBOT_PARAMS = 1002;
+  ROBOT_MOVE = 1003;
+  ROBOT_CHANGE_MODE = 1004;
+  ROBOT_ROTATE_HEAD = 1005;
+  ROBOT_KICK = 1006;
+  ROBOT_STAND_STILL = 1007;
+  ROBOT_STEP_ON_SPOT = 1008;
+  SET_ROBOT_INFO = 1009;
+  ROBOT_RESTART = 1010;
+  PROCESS_RESTART = 1011;
+  ROBOT_WAVE_HAND = 1012;
+  ROBOT_ZERO_POSE_SET = 1013;
+  ROBOT_ROTATE_HEAD_WITH_POSITION = 1014;
+  ROBOT_LIE_DOWN = 1015;
+  ROBOT_GET_UP = 1016;
+  ROBOT_MOVE_HAND_END_EFFECTOR_WITH_AUX = 1017;
+  ROBOT_MOVE_HAND_END_EFFECTOR = 1018;
+  ROBOT_CONTROL_GRIPPER = 1019;
+  GET_FRAME_TRANSFORM = 1020;
+  ROBOT_SWITCH_HAND_END_EFFECTOR_CONTROL_MODE = 1021;
+  ROBOT_SHAKE_HAND = 1022;
+  ROBOT_DANCE = 1023;
+  UPDATE_PASSWORD = 1024;
+  AUTH_USER = 1025;
+  AUTH_GET_SETTINGS = 1026;
+  ROBOT_COMMON_CHANNEL = 1027;
+  ROBOT_WHOLE_BODY_DANCE = 1028;
+  ROBOT_STOP_DANCE = 1029;
+  SWITCH_AP_SERVICE = 1030;
+  ROBOT_SNIFFING = 1031;
+}
+
+enum OperationStatus {
+  OPERATION_UNKNOWN = 0;
+  OPERATION_SUCCESS = 1;
+  OPERATION_FAIL = 2;
+}
+
+message RpcRequest {
+  RpcApiId api_id = 1;
+  string uuid = 2;
+  bytes payload = 3;
+  string token = 4;
+  int32 client_version = 5;
+}
+
+message RpcResponse {
+  RpcApiId api_id = 1;
+  string uuid = 2;
+  bytes payload = 3;
+  OperationStatus operation_status = 4;
+  int32 server_version = 5;
+}
