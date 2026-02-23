@@ -4,8 +4,8 @@ build-backend = "uv_build"
 
 [project]
 name = "booster-rpc"
-version = "0.0.1"
-description = "Booster RPC"
+version = "0.0.3"
+description = "Python client for controlling Booster K1 humanoid robots via gRPC"
 authors = [
   { name = "Miguel Villa Floran", email = "miguel.villafloran@gmail.com" },
 ]
