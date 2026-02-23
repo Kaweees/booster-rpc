@@ -22,7 +22,7 @@ classifiers = [
   "Operating System :: OS Independent",
 ]
 
-dependencies = ["numpy>=2.4.2", "opencv-python>=4.13.0.92", "protobuf>=6.33.5"]
+dependencies = ["grpcio>=1.78.1", "numpy>=2.4.2", "opencv-python>=4.13.0.92", "protobuf>=6.33.5"]
 
 [dependency-groups]
 dev = ["ipykernel", "pre-commit"]
