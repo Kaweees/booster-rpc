@@ -29,6 +29,7 @@ ignore = [
   "SIM102", # Use a single if-statement instead of nested if-statements
   "SIM117", # Merge with statements for context managers that have same scope
   "SIM118", # Checks for key-existence checks against dict.keys() calls
+  "RUF009", # Do not perform function call in dataclass defaults
 ]
 
 [lint.isort]
