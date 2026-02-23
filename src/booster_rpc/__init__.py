@@ -1,4 +1,4 @@
-from booster_rpc.connection import BoosterRPCConnection
+from booster_rpc.connection import BoosterConnection
 from booster_rpc.proto import (
     GetRobotStatusRequest,
     GetRobotStatusResponse,
@@ -14,7 +14,7 @@ from booster_rpc.proto import (
 )
 
 __all__ = [
-    "BoosterRPCConnection",
+    "BoosterConnection",
     "GetRobotStatusRequest",
     "GetRobotStatusResponse",
     "OperationStatus",

@@ -25,6 +25,9 @@ classifiers = [
 dependencies = [
   "betterproto>=1.2.5",
   "grpcio>=1.78.1",
+  "numpy>=2.4.2",
+  "opencv-python>=4.13.0.92",
+  "websockets>=16.0",
 ]
 
 [dependency-groups]
