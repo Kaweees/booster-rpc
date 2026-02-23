@@ -4,15 +4,15 @@ build-backend = "uv_build"
 
 [project]
 name = "booster-rpc"
-version = "0.0.4"
-description = "Python client for controlling Booster K1 humanoid robots via gRPC"
+version = "0.0.5"
+description = "Python client for controlling Booster K1 humanoid robots via gRPC and WebSocket"
 authors = [
   { name = "Miguel Villa Floran", email = "miguel.villafloran@gmail.com" },
 ]
 requires-python = ">=3.11,<3.14"
 readme = "README.md"
 license = { file = "LICENSE" }
-keywords = ["robotics", "booster", "rpc"]
+keywords = ["robotics", "robot", "control", "humanoid", "booster", "k1"]
 classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",

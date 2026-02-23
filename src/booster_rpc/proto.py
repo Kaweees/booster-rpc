@@ -61,6 +61,18 @@ class RpcRequest(betterproto.Message):
     token: str = betterproto.string_field(4)
     client_version: int = betterproto.int32_field(5)
 
+    def __post_init__(self):
+        super().__post_init__()
+        self._convert_enums()
+
+    def _convert_enums(self):
+        self.api_id = RpcApiId(self.api_id)
+
+    def parse(self, data: bytes):
+        super().parse(data)
+        self._convert_enums()
+        return self
+
 
 @dataclass
 class RpcResponse(betterproto.Message):
@@ -69,6 +81,19 @@ class RpcResponse(betterproto.Message):
     payload: bytes = betterproto.bytes_field(3)
     operation_status: OperationStatus = betterproto.enum_field(4)
     server_version: int = betterproto.int32_field(5)
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._convert_enums()
+
+    def _convert_enums(self):
+        self.api_id = RpcApiId(self.api_id)
+        self.operation_status = OperationStatus(self.operation_status)
+
+    def parse(self, data: bytes):
+        super().parse(data)
+        self._convert_enums()
+        return self
 
 
 @dataclass
@@ -93,6 +118,18 @@ class GetRobotStatusResponse(betterproto.Message):
     mode: RobotMode = betterproto.enum_field(1)
     robot_info: RobotInfo = betterproto.message_field(2)
 
+    def __post_init__(self):
+        super().__post_init__()
+        self._convert_enums()
+
+    def _convert_enums(self):
+        self.mode = RobotMode(self.mode)
+
+    def parse(self, data: bytes):
+        super().parse(data)
+        self._convert_enums()
+        return self
+
 
 @dataclass
 class RobotMoveRequest(betterproto.Message):
@@ -104,6 +141,18 @@ class RobotMoveRequest(betterproto.Message):
 @dataclass
 class RobotChangeModeRequest(betterproto.Message):
     mode: RobotMode = betterproto.enum_field(1)
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._convert_enums()
+
+    def _convert_enums(self):
+        self.mode = RobotMode(self.mode)
+
+    def parse(self, data: bytes):
+        super().parse(data)
+        self._convert_enums()
+        return self
 
 
 @dataclass

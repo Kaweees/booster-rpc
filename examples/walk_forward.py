@@ -19,10 +19,10 @@ def main():
 
     resp = conn._call(RpcApiId.GET_ROBOT_STATUS)
     status = GetRobotStatusResponse().parse(resp.payload)
-    print(f"Current mode: {RobotMode(status.mode).name}")
+    print(f"Current mode: {status.mode.name}")
 
-    if status.mode != RobotMode.WALKING.value:
-        if status.mode == RobotMode.DAMPING.value:
+    if status.mode != RobotMode.WALKING:
+        if status.mode == RobotMode.DAMPING:
             conn._call(RpcApiId.ROBOT_CHANGE_MODE, bytes(RobotChangeModeRequest(mode=RobotMode.PREPARE)))
             print("Mode -> Prepare")
             time.sleep(3)
