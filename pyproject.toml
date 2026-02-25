@@ -4,17 +4,18 @@ build-backend = "uv_build"
 
 [project]
 name = "booster-rpc"
-version = "0.0.5"
+version = "0.0.6"
 description = "Python client for controlling Booster K1 humanoid robots via gRPC and WebSocket"
 authors = [
   { name = "Miguel Villa Floran", email = "miguel.villafloran@gmail.com" },
 ]
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.10,<3.14"
 readme = "README.md"
 license = { file = "LICENSE" }
 keywords = ["robotics", "robot", "control", "humanoid", "booster", "k1"]
 classifiers = [
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -25,7 +26,7 @@ classifiers = [
 dependencies = [
   "betterproto>=1.2.5",
   "grpcio>=1.78.1",
-  "numpy>=2.4.2",
+  "numpy>=1.26.0",
   "opencv-python>=4.13.0.92",
   "websockets>=16.0",
 ]
