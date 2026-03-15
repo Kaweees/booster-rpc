@@ -7,7 +7,7 @@ import websockets
 
 from booster_rpc.proto import OperationStatus, RpcRequest, RpcResponse
 
-DEFAULT_IP = "10.0.0.185"
+DEFAULT_IP = "10.0.0.15"
 DEFAULT_WS_PORT = 51111
 DEFAULT_GRPC_PORT = 50051
 
