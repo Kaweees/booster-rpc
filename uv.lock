@@ -36,7 +36,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/ff/2e/abfed7a721928e14a
 
 [[package]]
 name = "booster-rpc"
-version = "0.0.7"
+version = "0.0.8"
 source = { editable = "." }
 dependencies = [
     { name = "betterproto" },

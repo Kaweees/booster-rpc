@@ -31,7 +31,7 @@ class BoosterConnection:
 
     # -- gRPC RPC --
 
-    def _call(self, api_id: int, payload: bytes = b""):
+    def call(self, api_id: int, payload: bytes = b""):
         """Send an RPC request and return the response.
 
         Args:

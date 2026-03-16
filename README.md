@@ -14,7 +14,7 @@ pip install booster-rpc
 from booster_rpc import BoosterConnection, GetRobotStatusResponse, RpcApiId
 
 conn = BoosterConnection()
-resp = conn._call(RpcApiId.GET_ROBOT_STATUS)
+resp = conn.call(RpcApiId.GET_ROBOT_STATUS)
 status = GetRobotStatusResponse().parse(resp.payload)
 print(f"Current mode: {status.mode.name}")
 print(f"Current model: {status.robot_info.model}")
