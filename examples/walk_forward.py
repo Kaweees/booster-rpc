@@ -12,6 +12,25 @@ from booster_rpc import (
 )
 
 MOVE_INTERVAL = 0.05
+MODE_POLL_INTERVAL = 0.5
+MODE_CHANGE_TIMEOUT = 30.0
+
+
+def change_mode(conn, mode, timeout=MODE_CHANGE_TIMEOUT, poll_interval=MODE_POLL_INTERVAL):
+    """Request a mode change and re-issue until the robot reports it has taken effect.
+
+    The transition latency depends on the robot's current pose, so a single call
+    plus a fixed sleep is unreliable.
+    """
+    deadline = time.time() + timeout
+    while True:
+        conn.call(RpcApiId.ROBOT_CHANGE_MODE, bytes(RobotChangeModeRequest(mode=mode)))
+        resp = conn.call(RpcApiId.GET_ROBOT_STATUS)
+        if GetRobotStatusResponse().parse(resp.payload).mode == mode:
+            return
+        if time.time() >= deadline:
+            raise TimeoutError(f"Robot did not enter {mode.name} within {timeout}s")
+        time.sleep(poll_interval)
 
 
 def main():
@@ -23,12 +42,15 @@ def main():
 
     if status.mode != RobotMode.WALKING:
         if status.mode == RobotMode.DAMPING:
-            conn.call(RpcApiId.ROBOT_CHANGE_MODE, bytes(RobotChangeModeRequest(mode=RobotMode.PREPARE)))
+            change_mode(conn, RobotMode.PREPARE)
             print("Mode -> Prepare")
-            time.sleep(3)
-        conn.call(RpcApiId.ROBOT_CHANGE_MODE, bytes(RobotChangeModeRequest(mode=RobotMode.WALKING)))
+
+            conn.call(RpcApiId.ROBOT_GET_UP)
+            print("Getting up...")
+            time.sleep(10)
+
+        change_mode(conn, RobotMode.WALKING)
         print("Mode -> Walking")
-        time.sleep(3)
 
     print("Moving forward...")
     end_time = time.time() + 3.0
