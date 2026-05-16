@@ -1,12 +1,10 @@
 """Walk the robot forward for 3 seconds."""
 
 import time
-from turtle import mode
 
 from booster_rpc import (
     BoosterConnection,
     GetRobotStatusResponse,
-    RobotChangeModeRequest,
     RobotMode,
     RobotMoveRequest,
     RpcApiId,
@@ -17,17 +15,18 @@ MODE_POLL_INTERVAL = 0.5
 MODE_CHANGE_TIMEOUT = 30.0
 
 
-def change_mode(conn: BoosterConnection, mode: RobotMode, timeout=MODE_CHANGE_TIMEOUT, poll_interval=MODE_POLL_INTERVAL):
-    """Request a mode change and re-issue until the robot reports it has taken effect.
+def change_mode(
+    conn: BoosterConnection, mode: RobotMode, timeout=MODE_CHANGE_TIMEOUT, poll_interval=MODE_POLL_INTERVAL
+):
+    """Request a mode change and poll until the robot reports it has taken effect.
 
     The transition latency depends on the robot's current pose, so a single call
     plus a fixed sleep is unreliable.
     """
+    conn.change_mode(mode)
     end_time = time.perf_counter() + timeout
     while time.perf_counter() < end_time:
-        conn.call(RpcApiId.ROBOT_CHANGE_MODE, bytes(RobotChangeModeRequest(mode=mode)))
-        resp = conn.call(RpcApiId.GET_ROBOT_STATUS)
-        if GetRobotStatusResponse().parse(resp.payload).mode == mode:
+        if conn.get_mode() == mode:
             return
         time.sleep(poll_interval)
     raise TimeoutError(f"Robot did not enter {mode.name} within {timeout}s")
