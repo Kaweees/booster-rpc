@@ -11,11 +11,10 @@ pip install booster-rpc
 ## Usage
 
 ```python
-from booster_rpc import BoosterConnection, GetRobotStatusResponse, RpcApiId
+from booster_rpc import BoosterConnection
 
-conn = BoosterConnection()
-resp = conn.call(RpcApiId.GET_ROBOT_STATUS)
-status = GetRobotStatusResponse().parse(resp.payload)
-print(f"Current mode: {status.mode.name}")
-print(f"Current model: {status.robot_info.model}")
+k1 = BoosterConnection()
+k1_status = k1.get_status()
+print(f"Current mode: {k1_status.mode.name}")
+print(f"Current model: {k1_status.robot_info.model}")
 ```
