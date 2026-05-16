@@ -15,7 +15,7 @@ MODE_CHANGE_TIMEOUT = 30.0
 def change_mode(
     conn: BoosterConnection, mode: RobotMode, timeout=MODE_CHANGE_TIMEOUT, poll_interval=MODE_POLL_INTERVAL
 ) -> None:
-    """Repeatedly request a mode change until the robot reports the target mode.
+    """Request a mode change and poll until the robot reports it has taken effect.
 
     The transition latency depends on the robot's current pose, so a single call
     plus a fixed sleep is unreliable.
