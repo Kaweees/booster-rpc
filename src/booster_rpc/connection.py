@@ -7,15 +7,16 @@ import grpc
 import websockets
 
 from booster_rpc.proto import (
-    Frame,
     DanceId,
     DanceRequest,
+    Frame,
     GetFrameTransformRequest,
     GetFrameTransformResponse,
     GetRobotStatusResponse,
     GetUpWithModeRequest,
     HandAction,
     HandIndex,
+    MoveHandEndEffectorRequest,
     OperationStatus,
     Posture,
     RobotChangeModeRequest,
@@ -23,20 +24,20 @@ from booster_rpc.proto import (
     RobotMode,
     RobotMoveRequest,
     RobotRotateHeadRequest,
-    MoveHandEndEffectorRequest,
-    VisualKickRequest,
-    VisualKickVersion,
-    WholeBodyDanceId,
-    WholeBodyDanceRequest,
     RobotWaveHandRequest,
     RpcApiId,
     RpcRequest,
     RpcResponse,
+    VisualKickRequest,
+    VisualKickVersion,
+    WholeBodyDanceId,
+    WholeBodyDanceRequest,
 )
 
 DEFAULT_IP = "10.0.0.185"
 DEFAULT_WS_PORT = 51111
 DEFAULT_GRPC_PORT = 50051
+DEFAULT_RPC_TIMEOUT = 5.0
 
 JPEG_SOI = b"\xff\xd8"
 JPEG_EOI = b"\xff\xd9"
@@ -58,12 +59,13 @@ class BoosterConnection:
 
     # -- gRPC RPC --
 
-    def call(self, api_id: RpcApiId, payload: bytes = b""):
+    def call(self, api_id: RpcApiId, payload: bytes = b"", *, timeout: float = DEFAULT_RPC_TIMEOUT) -> RpcResponse:
         """Send a raw RPC request and return the response envelope.
 
         Args:
             api_id: The RpcApiId enum value identifying the remote procedure.
             payload: Serialised protobuf bytes for the request body.
+            timeout: Maximum seconds to wait for the response.
 
         Returns:
             The RpcResponse from the robot.
@@ -72,14 +74,19 @@ class BoosterConnection:
             RuntimeError: If the robot returns OPERATION_FAIL.
         """
         req = RpcRequest(api_id=api_id, uuid=str(uuid.uuid4()), payload=payload)
-        resp = self._robot_request(req, timeout=5)
+        resp = self._robot_request(req, timeout=timeout)
         if resp.operation_status == OperationStatus.FAIL:
             raise RuntimeError(f"Robot returned OPERATION_FAIL for {api_id}")
         return resp
 
-    def change_mode(self, mode: RobotMode):
+    def change_mode(self, mode: RobotMode) -> RpcResponse:
         """Request a robot mode transition."""
         return self.call(RpcApiId.ROBOT_CHANGE_MODE, bytes(RobotChangeModeRequest(mode=mode)))
+
+    def get_status(self) -> GetRobotStatusResponse:
+        """Return the current robot status."""
+        resp = self.call(RpcApiId.GET_ROBOT_STATUS)
+        return GetRobotStatusResponse().parse(resp.payload)
 
     def get_mode(self) -> RobotMode:
         """Return the current robot mode.
@@ -87,9 +94,7 @@ class BoosterConnection:
         The documented GetMode RPC is exposed here through the existing robot status
         call, which already returns the current mode.
         """
-        resp = self.call(RpcApiId.GET_ROBOT_STATUS)
-        status = GetRobotStatusResponse().parse(resp.payload)
-        return status.mode
+        return self.get_status().mode
 
     def move(self, vx: float = 0.0, vy: float = 0.0, vyaw: float = 0.0):
         """Send a base velocity command in the robot's base frame."""
@@ -108,9 +113,10 @@ class BoosterConnection:
         )
         return self.call(RpcApiId.ROBOT_MOVE_HAND_END_EFFECTOR, bytes(payload))
 
-    def get_up_with_mode(self, mode: RobotMode):
-        """Stand the robot up and enter the requested motion mode."""
-        return self.call(RpcApiId.ROBOT_GET_UP, bytes(GetUpWithModeRequest(mode=mode)))
+    def get_up(self, mode: RobotMode | None = None):
+        """Stand the robot up, optionally entering a target motion mode."""
+        payload = bytes(GetUpWithModeRequest(mode=mode)) if mode is not None else b""
+        return self.call(RpcApiId.ROBOT_GET_UP, payload)
 
     def reset_odometry(self):
         """Reset the robot's gait odometry."""

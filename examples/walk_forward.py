@@ -4,10 +4,7 @@ import time
 
 from booster_rpc import (
     BoosterConnection,
-    GetRobotStatusResponse,
     RobotMode,
-    RobotMoveRequest,
-    RpcApiId,
 )
 
 MOVE_INTERVAL = 0.05
@@ -24,8 +21,8 @@ def change_mode(
     plus a fixed sleep is unreliable.
     """
     conn.change_mode(mode)
-    end_time = time.perf_counter() + timeout
-    while time.perf_counter() < end_time:
+    deadline = time.perf_counter() + timeout
+    while time.perf_counter() < deadline:
         if conn.get_mode() == mode:
             return
         time.sleep(poll_interval)
@@ -35,8 +32,7 @@ def change_mode(
 def main():
     conn = BoosterConnection()
 
-    resp = conn.call(RpcApiId.GET_ROBOT_STATUS)
-    status = GetRobotStatusResponse().parse(resp.payload)
+    status = conn.get_status()
     print(f"Current mode: {status.mode.name}")
 
     if status.mode != RobotMode.WALKING:
@@ -44,20 +40,19 @@ def main():
             change_mode(conn, RobotMode.PREPARE)
             print("Mode -> Prepare")
 
-            conn.call(RpcApiId.ROBOT_GET_UP)
+            conn.get_up()
             print("Getting up...")
-            time.sleep(10)
 
         change_mode(conn, RobotMode.WALKING)
         print("Mode -> Walking")
 
     print("Moving forward...")
-    end_time = time.perf_counter() + 3.0
-    while time.perf_counter() < end_time:
-        conn.call(RpcApiId.ROBOT_MOVE, bytes(RobotMoveRequest(vx=0.5)))
+    deadline = time.perf_counter() + 3.0
+    while time.perf_counter() < deadline:
+        conn.move(vx=0.5)
         time.sleep(MOVE_INTERVAL)
 
-    conn.call(RpcApiId.ROBOT_MOVE, bytes(RobotMoveRequest()))
+    conn.move()
     print("Stopped")
 
 
