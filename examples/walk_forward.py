@@ -8,6 +8,7 @@ from booster_rpc import (
 )
 
 MOVE_INTERVAL = 0.05
+GET_UP_SETTLE_TIME = 10.0
 
 
 def main():
@@ -23,6 +24,8 @@ def main():
 
             conn.get_up()
             print("Getting up...")
+        # Allow the get-up motion to settle.
+        time.sleep(GET_UP_SETTLE_TIME)
 
         conn.change_mode(RobotMode.WALKING)
         print("Mode -> Walking")
