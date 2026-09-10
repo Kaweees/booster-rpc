@@ -17,13 +17,15 @@ def main():
     status = conn.get_status()
     print(f"Current mode: {status.mode.name}")
 
+    # Skip the get-up sequence if the robot is already walking.
     if status.mode != RobotMode.WALKING:
-        if status.mode == RobotMode.DAMPING:
-            print("Mode -> Prepare")
-            conn.change_mode(RobotMode.PREPARE)            print("Mode -> Prepare")
+        # Startup sequence: Prepare -> Get Up -> WALKING.
+        conn.change_mode(RobotMode.PREPARE)
+        print("Mode -> Prepare")
 
-            conn.get_up()
-            print("Getting up...")
+        # Prepare holds a pose; get_up() performs the stand-up motion.
+        conn.get_up()
+        print("Getting up...")
         # Allow the get-up motion to settle.
         time.sleep(GET_UP_SETTLE_TIME)
 
