@@ -1,4 +1,5 @@
 import asyncio
+import time
 import uuid
 from collections.abc import Callable
 from typing import Any
@@ -38,6 +39,8 @@ DEFAULT_IP = "10.0.0.225"
 DEFAULT_WS_PORT = 51111
 DEFAULT_GRPC_PORT = 50051
 DEFAULT_RPC_TIMEOUT = 5.0
+DEFAULT_MODE_CHANGE_TIMEOUT = 30.0
+DEFAULT_MODE_POLL_INTERVAL = 0.5
 
 JPEG_SOI = b"\xff\xd8"
 JPEG_EOI = b"\xff\xd9"
@@ -79,9 +82,24 @@ class BoosterConnection:
             raise RuntimeError(f"Robot returned OPERATION_FAIL for {api_id}")
         return resp
 
-    def change_mode(self, mode: RobotMode) -> RpcResponse:
-        """Request a robot mode transition."""
-        return self.call(RpcApiId.ROBOT_CHANGE_MODE, bytes(RobotChangeModeRequest(mode=mode)))
+    def change_mode(
+        self,
+        mode: RobotMode,
+        timeout: float = DEFAULT_MODE_CHANGE_TIMEOUT,
+        poll_interval: float = DEFAULT_MODE_POLL_INTERVAL,
+    ) -> RpcResponse:
+        """Request a mode change and poll until the robot reports it has taken effect.
+
+        The transition latency depends on the robot's current pose, so a single call plus a fixed sleep is unreliable.
+        """
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            response = self.call(RpcApiId.ROBOT_CHANGE_MODE, bytes(RobotChangeModeRequest(mode=mode)))
+            if self.get_mode() == mode:
+                return response
+            if (remaining := deadline - time.monotonic()) > 0:
+                time.sleep(min(poll_interval, remaining))
+        raise TimeoutError(f"Robot did not enter {mode.name} within {timeout}s")
 
     def get_status(self) -> GetRobotStatusResponse:
         """Return the current robot status."""
