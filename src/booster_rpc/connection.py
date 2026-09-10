@@ -41,6 +41,7 @@ DEFAULT_GRPC_PORT = 50051
 DEFAULT_RPC_TIMEOUT = 5.0
 DEFAULT_MODE_CHANGE_TIMEOUT = 30.0
 DEFAULT_MODE_POLL_INTERVAL = 0.5
+GET_UP_SETTLE_TIME = 10.0
 
 JPEG_SOI = b"\xff\xd8"
 JPEG_EOI = b"\xff\xd9"
@@ -135,6 +136,18 @@ class BoosterConnection:
         """Stand the robot up, optionally entering a target motion mode."""
         payload = bytes(GetUpWithModeRequest(mode=mode)) if mode is not None else b""
         return self.call(RpcApiId.ROBOT_GET_UP, payload)
+
+    def stand_up(self) -> None:
+        """Prepare, get up, and enter walking mode unless already walking."""
+        if self.get_mode() == RobotMode.WALKING:
+            return
+
+        self.change_mode(RobotMode.PREPARE)
+        # Prepare holds a pose; get_up() performs the stand-up motion.
+        self.get_up()
+        # Allow the get-up motion to settle before entering walking mode.
+        time.sleep(GET_UP_SETTLE_TIME)
+        self.change_mode(RobotMode.WALKING)
 
     def reset_odometry(self):
         """Reset the robot's gait odometry."""
