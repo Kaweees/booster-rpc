@@ -1,15 +1,15 @@
-"""Stream the robot's camera to an OpenCV window. Press q to quit."""
+"""Stream a Booster K1 camera to an OpenCV window. Press q to quit."""
 
 import asyncio
 
 import cv2
 import numpy as np
 
-from booster_rpc import BoosterConnection
+from booster_rpc import K1Connection
 
 
 def main():
-    conn = BoosterConnection()
+    conn = K1Connection()
     window = "Booster K1 Camera"
     cv2.namedWindow(window, cv2.WINDOW_NORMAL)
 

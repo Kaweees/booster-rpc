@@ -10,20 +10,30 @@ pip install booster-rpc
 
 ## Usage
 
+> [!NOTE]
+> The `with` block closes the connection automatically.
+
+### Booster K1
+
 ```python
 from booster_rpc import K1Connection
 
-k1 = K1Connection()
-k1_status = k1.get_status()
-print(f"Current mode: {k1_status.mode.name}")
-print(f"Current model: {k1_status.robot_info.model}")
+with K1Connection() as k1:
+    status = k1.get_status()
+    print(f"Current mode: {status.mode.name}")
+    print(f"Current model: {status.robot_info.model}")
+    k1.stand_up()
 ```
 
-```python
-from booster_rpc import T1Connection
+### Booster T1
 
-t1 = T1Connection()
-t1_status = t1.get_status()
-print(f"Current mode: {t1_status.mode.name}")
-print(f"Current model: {t1_status.robot_info.model}")
+```python
+from booster_rpc import RobotMode, T1Connection
+
+with T1Connection() as t1:
+    status = t1.get_status()
+    print(f"Current mode: {status.mode.name}")
+    print(f"Body control: {status.body_control.name}")
+    print(f"Action: {status.action.name}")
+    t1.get_up(RobotMode.WALKING)
 ```

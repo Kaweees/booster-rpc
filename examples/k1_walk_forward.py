@@ -2,13 +2,13 @@
 
 import time
 
-from booster_rpc import BoosterConnection
+from booster_rpc import K1Connection
 
 MOVE_INTERVAL = 0.05
 
 
 def main():
-    conn = BoosterConnection()
+    conn = K1Connection()
 
     status = conn.get_status()
     print(f"Current mode: {status.mode.name}")
