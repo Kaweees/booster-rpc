@@ -125,26 +125,26 @@ class BoosterConnection:
 
     def move_hand_end_effector(self, target_posture: Posture, time_millis: int, hand_index: HandIndex):
         """Move a hand end effector to a target posture over a duration."""
-        payload = MoveHandEndEffectorRequest(
+        payload = bytes(MoveHandEndEffectorRequest(
             target_posture=target_posture,
             time_millis=time_millis,
             hand_index=hand_index,
-        )
-        return self.call(RpcApiId.ROBOT_MOVE_HAND_END_EFFECTOR, bytes(payload))
+        ))
+        return self.call(RpcApiId.ROBOT_MOVE_HAND_END_EFFECTOR, payload)
 
-    def get_up(self, mode: RobotMode | None = None):
-        """Stand the robot up, optionally entering a target motion mode."""
-        payload = bytes(GetUpWithModeRequest(mode=mode)) if mode is not None else b""
-        return self.call(RpcApiId.ROBOT_GET_UP, payload)
+    def get_up(self, mode: RobotMode = RobotMode.WALKING):
+        """Get up into WALKING (the default) or SOCCER mode."""
+        if mode not in (RobotMode.WALKING, RobotMode.SOCCER):
+            raise ValueError("Get-up target mode must be WALKING or SOCCER")
+        return self.call(RpcApiId.ROBOT_GET_UP, bytes(GetUpWithModeRequest(mode=mode)))
 
     def stand_up(self) -> None:
         """Prepare, get up, and enter walking mode unless already walking."""
         if self.get_mode() == RobotMode.WALKING:
             return
-
         self.change_mode(RobotMode.PREPARE)
         # Prepare holds a pose; get_up() performs the stand-up motion.
-        self.get_up()
+        self.get_up(RobotMode.WALKING)
         # Allow the get-up motion to settle before entering walking mode.
         time.sleep(GET_UP_SETTLE_TIME)
         self.change_mode(RobotMode.WALKING)
