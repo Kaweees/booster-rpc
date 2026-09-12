@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-import betterproto
+import betterproto2
 
 
-class RpcApiId(betterproto.Enum):
+class RpcApiId(betterproto2.Enum):
     """Known RPC identifiers exposed by the Booster robot service."""
 
     UNKNOWN_API_ID = 0
@@ -41,7 +41,7 @@ class RpcApiId(betterproto.Enum):
     ROBOT_SNIFFING = 1031
 
 
-class OperationStatus(betterproto.Enum):
+class OperationStatus(betterproto2.Enum):
     """Outcome codes returned by the robot RPC gateway."""
 
     UNKNOWN = 0
@@ -49,7 +49,7 @@ class OperationStatus(betterproto.Enum):
     FAIL = 2
 
 
-class RobotMode(betterproto.Enum):
+class RobotMode(betterproto2.Enum):
     """Robot motion modes reported by the status RPCs."""
 
     DAMPING = 0
@@ -59,21 +59,21 @@ class RobotMode(betterproto.Enum):
     SOCCER = 4
 
 
-class HandAction(betterproto.Enum):
+class HandAction(betterproto2.Enum):
     """Open/close action for hand gestures."""
 
     OPEN = 0
     CLOSE = 1
 
 
-class HandIndex(betterproto.Enum):
+class HandIndex(betterproto2.Enum):
     """Identifies the left or right hand."""
 
     LEFT = 0
     RIGHT = 1
 
 
-class DanceId(betterproto.Enum):
+class DanceId(betterproto2.Enum):
     """Standard dance identifiers supported by the motion service."""
 
     NEW_YEAR = 0
@@ -87,7 +87,7 @@ class DanceId(betterproto.Enum):
     STOP = 1000
 
 
-class WholeBodyDanceId(betterproto.Enum):
+class WholeBodyDanceId(betterproto2.Enum):
     """Whole-body dance identifiers supported by the motion service."""
 
     ARBIC_DANCE = 0
@@ -101,7 +101,7 @@ class WholeBodyDanceId(betterproto.Enum):
     GAI_GE_CHUN_FENG_DANCE = 8
 
 
-class GaitType(betterproto.Enum):
+class GaitType(betterproto2.Enum):
     """Gait presets exposed by the motion-control interface."""
 
     WHOLE_BODY_HUMANLIKE_GAIT = 0
@@ -109,14 +109,14 @@ class GaitType(betterproto.Enum):
     HALF_BODY_HUMANLIKE_GAIT_V2 = 2
 
 
-class VisualKickVersion(betterproto.Enum):
+class VisualKickVersion(betterproto2.Enum):
     """Visual-kick behavior variants."""
 
     V1 = 0
     V2 = 1
 
 
-class Frame(betterproto.Enum):
+class Frame(betterproto2.Enum):
     """Reference frames accepted by the transform RPC."""
 
     BODY = 0
@@ -128,348 +128,244 @@ class Frame(betterproto.Enum):
 
 
 @dataclass
-class RpcRequest(betterproto.Message):
+class RpcRequest(betterproto2.Message):
     """Envelope sent to the Booster gRPC gateway."""
 
-    api_id: RpcApiId = betterproto.enum_field(1)
-    uuid: str = betterproto.string_field(2)
-    payload: bytes = betterproto.bytes_field(3)
-    token: str = betterproto.string_field(4)
-    client_version: int = betterproto.int32_field(5)
+    api_id: RpcApiId = betterproto2.field(1, betterproto2.TYPE_ENUM, default_factory=lambda: RpcApiId.UNKNOWN_API_ID)
+    uuid: str = betterproto2.field(2, betterproto2.TYPE_STRING)
+    payload: bytes = betterproto2.field(3, betterproto2.TYPE_BYTES)
+    token: str = betterproto2.field(4, betterproto2.TYPE_STRING)
+    client_version: int = betterproto2.field(5, betterproto2.TYPE_INT32)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.api_id = RpcApiId(self.api_id)
-
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
 
 
 @dataclass
-class RpcResponse(betterproto.Message):
+class RpcResponse(betterproto2.Message):
     """Envelope returned by the Booster gRPC gateway."""
 
-    api_id: RpcApiId = betterproto.enum_field(1)
-    uuid: str = betterproto.string_field(2)
-    payload: bytes = betterproto.bytes_field(3)
-    operation_status: OperationStatus = betterproto.enum_field(4)
-    server_version: int = betterproto.int32_field(5)
+    api_id: RpcApiId = betterproto2.field(1, betterproto2.TYPE_ENUM, default_factory=lambda: RpcApiId.UNKNOWN_API_ID)
+    uuid: str = betterproto2.field(2, betterproto2.TYPE_STRING)
+    payload: bytes = betterproto2.field(3, betterproto2.TYPE_BYTES)
+    operation_status: OperationStatus = betterproto2.field(
+        4, betterproto2.TYPE_ENUM, default_factory=lambda: OperationStatus.UNKNOWN
+    )
+    server_version: int = betterproto2.field(5, betterproto2.TYPE_INT32)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.api_id = RpcApiId(self.api_id)
         self.operation_status = OperationStatus(self.operation_status)
 
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
-
 
 @dataclass
-class RobotInfo(betterproto.Message):
+class RobotInfo(betterproto2.Message):
     """Static robot identity and endpoint metadata."""
 
-    serial_number: str = betterproto.string_field(1)
-    name: str = betterproto.string_field(2)
-    version: str = betterproto.string_field(3)
-    model: str = betterproto.string_field(4)
-    delivery_time: int = betterproto.int64_field(5)
-    ip: str = betterproto.string_field(6)
-    rpc_port: int = betterproto.int32_field(7)
-    websocket_port: int = betterproto.int32_field(8)
+    serial_number: str = betterproto2.field(1, betterproto2.TYPE_STRING)
+    name: str = betterproto2.field(2, betterproto2.TYPE_STRING)
+    version: str = betterproto2.field(3, betterproto2.TYPE_STRING)
+    model: str = betterproto2.field(4, betterproto2.TYPE_STRING)
+    delivery_time: int = betterproto2.field(5, betterproto2.TYPE_INT64)
+    ip: str = betterproto2.field(6, betterproto2.TYPE_STRING)
+    rpc_port: int = betterproto2.field(7, betterproto2.TYPE_INT32)
+    websocket_port: int = betterproto2.field(8, betterproto2.TYPE_INT32)
 
 
 @dataclass
-class GetRobotStatusRequest(betterproto.Message):
+class GetRobotStatusRequest(betterproto2.Message):
     """Request the robot status for a specific serial number."""
 
-    serial_id: str = betterproto.string_field(1)
+    serial_id: str = betterproto2.field(1, betterproto2.TYPE_STRING)
 
 
 @dataclass
-class GetRobotStatusResponse(betterproto.Message):
+class GetRobotStatusResponse(betterproto2.Message):
     """Current robot mode and identity payload."""
 
-    mode: RobotMode = betterproto.enum_field(1)
-    robot_info: RobotInfo = betterproto.message_field(2)
+    mode: RobotMode = betterproto2.field(1, betterproto2.TYPE_ENUM, default_factory=lambda: RobotMode.DAMPING)
+    robot_info: RobotInfo | None = betterproto2.field(2, betterproto2.TYPE_MESSAGE, optional=True)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.mode = RobotMode(self.mode)
-
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
 
 
 @dataclass
-class GetModeResponse(betterproto.Message):
+class GetModeResponse(betterproto2.Message):
     """Standalone mode response used by the documented GetMode RPC."""
 
-    mode: RobotMode = betterproto.enum_field(1)
+    mode: RobotMode = betterproto2.field(1, betterproto2.TYPE_ENUM, default_factory=lambda: RobotMode.DAMPING)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.mode = RobotMode(self.mode)
-
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
 
 
 @dataclass
-class RobotMoveRequest(betterproto.Message):
+class RobotMoveRequest(betterproto2.Message):
     """Base velocity command in meters per second and radians per second."""
 
-    vx: float = betterproto.float_field(1)
-    vy: float = betterproto.float_field(2)
-    vyaw: float = betterproto.float_field(3)
+    vx: float = betterproto2.field(1, betterproto2.TYPE_FLOAT)
+    vy: float = betterproto2.field(2, betterproto2.TYPE_FLOAT)
+    vyaw: float = betterproto2.field(3, betterproto2.TYPE_FLOAT)
 
 
 @dataclass
-class Posture(betterproto.Message):
+class Posture(betterproto2.Message):
     """Target posture passed to the hand end-effector RPC."""
 
-    position: list[float] = betterproto.float_field(1)
-    orientation: list[float] = betterproto.float_field(2)
+    position: list[float] = betterproto2.field(1, betterproto2.TYPE_FLOAT, repeated=True)
+    orientation: list[float] = betterproto2.field(2, betterproto2.TYPE_FLOAT, repeated=True)
 
 
 @dataclass
-class MoveHandEndEffectorRequest(betterproto.Message):
+class MoveHandEndEffectorRequest(betterproto2.Message):
     """Request a hand end-effector motion to a target posture."""
 
-    target_posture: Posture = betterproto.message_field(1)
-    time_millis: int = betterproto.int32_field(2)
-    hand_index: HandIndex = betterproto.enum_field(3)
+    target_posture: Posture | None = betterproto2.field(1, betterproto2.TYPE_MESSAGE, optional=True)
+    time_millis: int = betterproto2.field(2, betterproto2.TYPE_INT32)
+    hand_index: HandIndex = betterproto2.field(3, betterproto2.TYPE_ENUM, default_factory=lambda: HandIndex.LEFT)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.hand_index = HandIndex(self.hand_index)
 
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
-
 
 @dataclass
-class RobotWaveHandRequest(betterproto.Message):
+class RobotWaveHandRequest(betterproto2.Message):
     """Start or stop a hand-waving gesture."""
 
-    action: HandAction = betterproto.enum_field(1)
+    action: HandAction = betterproto2.field(1, betterproto2.TYPE_ENUM, default_factory=lambda: HandAction.OPEN)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.action = HandAction(self.action)
-
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
 
 
 @dataclass
-class RobotHandshakeRequest(betterproto.Message):
+class RobotHandshakeRequest(betterproto2.Message):
     """Start or stop a handshake gesture."""
 
-    action: HandAction = betterproto.enum_field(1)
+    action: HandAction = betterproto2.field(1, betterproto2.TYPE_ENUM, default_factory=lambda: HandAction.OPEN)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.action = HandAction(self.action)
 
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
-
 
 @dataclass
-class RobotChangeModeRequest(betterproto.Message):
+class RobotChangeModeRequest(betterproto2.Message):
     """Request a robot motion-mode transition."""
 
-    mode: RobotMode = betterproto.enum_field(1)
+    mode: RobotMode = betterproto2.field(1, betterproto2.TYPE_ENUM, default_factory=lambda: RobotMode.DAMPING)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.mode = RobotMode(self.mode)
-
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
 
 
 @dataclass
-class RobotRotateHeadRequest(betterproto.Message):
+class RobotRotateHeadRequest(betterproto2.Message):
     """Head pitch and yaw command in radians."""
 
-    pitch: float = betterproto.float_field(1)
-    yaw: float = betterproto.float_field(2)
+    pitch: float = betterproto2.field(1, betterproto2.TYPE_FLOAT)
+    yaw: float = betterproto2.field(2, betterproto2.TYPE_FLOAT)
 
 
 @dataclass
-class UpperBodyCustomControlRequest(betterproto.Message):
+class UpperBodyCustomControlRequest(betterproto2.Message):
     """Enable or disable upper-body custom control."""
 
-    start: bool = betterproto.bool_field(1)
+    start: bool = betterproto2.field(1, betterproto2.TYPE_BOOL)
 
 
 @dataclass
-class GetUpWithModeRequest(betterproto.Message):
+class GetUpWithModeRequest(betterproto2.Message):
     """Stand the robot up and enter a specific motion mode."""
 
-    mode: RobotMode = betterproto.enum_field(1)
+    mode: RobotMode = betterproto2.field(1, betterproto2.TYPE_ENUM, default_factory=lambda: RobotMode.DAMPING)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.mode = RobotMode(self.mode)
 
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
-
 
 @dataclass
-class DanceRequest(betterproto.Message):
+class DanceRequest(betterproto2.Message):
     """Standard dance selection request."""
 
-    dance_id: DanceId = betterproto.enum_field(1)
+    dance_id: DanceId = betterproto2.field(1, betterproto2.TYPE_ENUM, default_factory=lambda: DanceId.NEW_YEAR)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.dance_id = DanceId(self.dance_id)
 
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
-
 
 @dataclass
-class WholeBodyDanceRequest(betterproto.Message):
+class WholeBodyDanceRequest(betterproto2.Message):
     """Whole-body dance selection request."""
 
-    dance_id: WholeBodyDanceId = betterproto.enum_field(1)
+    dance_id: WholeBodyDanceId = betterproto2.field(
+        1, betterproto2.TYPE_ENUM, default_factory=lambda: WholeBodyDanceId.ARBIC_DANCE
+    )
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.dance_id = WholeBodyDanceId(self.dance_id)
 
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
-
 
 @dataclass
-class VisualKickRequest(betterproto.Message):
+class VisualKickRequest(betterproto2.Message):
     """Start or stop the visual-kick behavior."""
 
-    start: bool = betterproto.bool_field(1)
-    version: VisualKickVersion = betterproto.enum_field(2)
+    start: bool = betterproto2.field(1, betterproto2.TYPE_BOOL)
+    version: VisualKickVersion = betterproto2.field(
+        2, betterproto2.TYPE_ENUM, default_factory=lambda: VisualKickVersion.V1
+    )
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.version = VisualKickVersion(self.version)
 
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
-
 
 @dataclass
-class SwitchGaitRequest(betterproto.Message):
+class SwitchGaitRequest(betterproto2.Message):
     """Select the active gait preset."""
 
-    gait_type: GaitType = betterproto.enum_field(1)
+    gait_type: GaitType = betterproto2.field(
+        1, betterproto2.TYPE_ENUM, default_factory=lambda: GaitType.WHOLE_BODY_HUMANLIKE_GAIT
+    )
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.gait_type = GaitType(self.gait_type)
-
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
 
 
 @dataclass
-class GetFrameTransformRequest(betterproto.Message):
+class GetFrameTransformRequest(betterproto2.Message):
     """Request the transform between two robot frames."""
 
-    src: Frame = betterproto.enum_field(1)
-    dst: Frame = betterproto.enum_field(2)
+    src: Frame = betterproto2.field(1, betterproto2.TYPE_ENUM, default_factory=lambda: Frame.BODY)
+    dst: Frame = betterproto2.field(2, betterproto2.TYPE_ENUM, default_factory=lambda: Frame.BODY)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         super().__post_init__()
-        self._convert_enums()
-
-    def _convert_enums(self):
         self.src = Frame(self.src)
         self.dst = Frame(self.dst)
 
-    def parse(self, data: bytes):
-        super().parse(data)
-        self._convert_enums()
-        return self
-
 
 @dataclass
-class Transform(betterproto.Message):
+class Transform(betterproto2.Message):
     """Flattened 4x4 transform matrix stored row-major."""
 
-    matrix: list[float] = betterproto.float_field(1)
+    matrix: list[float] = betterproto2.field(1, betterproto2.TYPE_FLOAT, repeated=True)
 
 
 @dataclass
-class GetFrameTransformResponse(betterproto.Message):
+class GetFrameTransformResponse(betterproto2.Message):
     """Response wrapper containing the requested frame transform."""
 
-    transform: Transform = betterproto.message_field(1)
+    transform: Transform | None = betterproto2.field(1, betterproto2.TYPE_MESSAGE, optional=True)

@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "booster-rpc"
-version = "0.0.12"
+version = "0.0.13"
 description = "Python client for controlling Booster K1 humanoid robots via gRPC and WebSocket"
 authors = [
   { name = "Miguel Villa Floran", email = "miguel.villafloran@gmail.com" },
@@ -23,7 +23,7 @@ classifiers = [
   "Operating System :: OS Independent",
 ]
 
-dependencies = ["betterproto", "grpcio", "numpy", "opencv-python", "websockets"]
+dependencies = ["betterproto2", "grpcio", "numpy", "opencv-python", "websockets"]
 
 [dependency-groups]
-dev = ["ipykernel", "pre-commit"]
+dev = ["ipykernel", "ipywidgets", "pre-commit"]

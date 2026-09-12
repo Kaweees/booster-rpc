@@ -7,7 +7,7 @@ from booster_rpc import BoosterConnection
 MOVE_INTERVAL = 0.05
 
 
-def main():
+def main() -> None:
     conn = BoosterConnection()
 
     status = conn.get_status()

@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import asyncio
 import time
 import uuid
-from collections.abc import Callable
-from typing import Any
+from collections.abc import Callable, Coroutine
+from types import TracebackType
+from typing import Any, Literal
 
 import grpc
 import websockets
@@ -50,7 +53,9 @@ JPEG_EOI = b"\xff\xd9"
 class BoosterConnection:
     """Client for communicating with a Booster K1 robot via gRPC and WebSocket."""
 
-    def __init__(self, ip: str = DEFAULT_IP, ws_port: int = DEFAULT_WS_PORT, grpc_port: int = DEFAULT_GRPC_PORT):
+    def __init__(
+        self, ip: str = DEFAULT_IP, ws_port: int = DEFAULT_WS_PORT, grpc_port: int = DEFAULT_GRPC_PORT
+    ) -> None:
         self.ip = ip
         self.ws_port = ws_port
         self.grpc_port = grpc_port
@@ -105,7 +110,7 @@ class BoosterConnection:
     def get_status(self) -> GetRobotStatusResponse:
         """Return the current robot status."""
         resp = self.call(RpcApiId.GET_ROBOT_STATUS)
-        return GetRobotStatusResponse().parse(resp.payload)
+        return GetRobotStatusResponse.parse(resp.payload)
 
     def get_mode(self) -> RobotMode:
         """Return the current robot mode.
@@ -115,24 +120,26 @@ class BoosterConnection:
         """
         return self.get_status().mode
 
-    def move(self, vx: float = 0.0, vy: float = 0.0, vyaw: float = 0.0):
+    def move(self, vx: float = 0.0, vy: float = 0.0, vyaw: float = 0.0) -> RpcResponse:
         """Send a base velocity command in the robot's base frame."""
         return self.call(RpcApiId.ROBOT_MOVE, bytes(RobotMoveRequest(vx=vx, vy=vy, vyaw=vyaw)))
 
-    def rotate_head(self, pitch: float, yaw: float):
+    def rotate_head(self, pitch: float, yaw: float) -> RpcResponse:
         """Send a head rotation command in radians."""
         return self.call(RpcApiId.ROBOT_ROTATE_HEAD, bytes(RobotRotateHeadRequest(pitch=pitch, yaw=yaw)))
 
-    def move_hand_end_effector(self, target_posture: Posture, time_millis: int, hand_index: HandIndex):
+    def move_hand_end_effector(self, target_posture: Posture, time_millis: int, hand_index: HandIndex) -> RpcResponse:
         """Move a hand end effector to a target posture over a duration."""
-        payload = bytes(MoveHandEndEffectorRequest(
-            target_posture=target_posture,
-            time_millis=time_millis,
-            hand_index=hand_index,
-        ))
+        payload = bytes(
+            MoveHandEndEffectorRequest(
+                target_posture=target_posture,
+                time_millis=time_millis,
+                hand_index=hand_index,
+            )
+        )
         return self.call(RpcApiId.ROBOT_MOVE_HAND_END_EFFECTOR, payload)
 
-    def get_up(self, mode: RobotMode = RobotMode.WALKING):
+    def get_up(self, mode: RobotMode = RobotMode.WALKING) -> RpcResponse:
         """Get up into WALKING (the default) or SOCCER mode."""
         if mode not in (RobotMode.WALKING, RobotMode.SOCCER):
             raise ValueError("Get-up target mode must be WALKING or SOCCER")
@@ -149,42 +156,42 @@ class BoosterConnection:
         time.sleep(GET_UP_SETTLE_TIME)
         self.change_mode(RobotMode.WALKING)
 
-    def reset_odometry(self):
+    def reset_odometry(self) -> RpcResponse:
         """Reset the robot's gait odometry."""
         return self.call(RpcApiId.ROBOT_ZERO_POSE_SET)
 
-    def dance(self, dance_id: DanceId):
+    def dance(self, dance_id: DanceId) -> RpcResponse:
         """Start a standard dance motion."""
         return self.call(RpcApiId.ROBOT_DANCE, bytes(DanceRequest(dance_id=dance_id)))
 
-    def whole_body_dance(self, dance_id: WholeBodyDanceId):
+    def whole_body_dance(self, dance_id: WholeBodyDanceId) -> RpcResponse:
         """Start a whole-body dance motion."""
         return self.call(RpcApiId.ROBOT_WHOLE_BODY_DANCE, bytes(WholeBodyDanceRequest(dance_id=dance_id)))
 
-    def stop_dance(self):
+    def stop_dance(self) -> RpcResponse:
         """Stop the current dance motion."""
         return self.call(RpcApiId.ROBOT_STOP_DANCE)
 
-    def visual_kick(self, start: bool, version: VisualKickVersion):
+    def visual_kick(self, start: bool, version: VisualKickVersion) -> RpcResponse:
         """Start or stop the visual kick behavior."""
         return self.call(RpcApiId.ROBOT_KICK, bytes(VisualKickRequest(start=start, version=version)))
 
-    def wave_hand(self, action: HandAction):
+    def wave_hand(self, action: HandAction) -> RpcResponse:
         """Start or stop the waving gesture."""
         return self.call(RpcApiId.ROBOT_WAVE_HAND, bytes(RobotWaveHandRequest(action=action)))
 
-    def handshake(self, action: HandAction):
+    def handshake(self, action: HandAction) -> RpcResponse:
         """Start or stop the handshake gesture."""
         return self.call(RpcApiId.ROBOT_SHAKE_HAND, bytes(RobotHandshakeRequest(action=action)))
 
     def get_frame_transform(self, src: Frame, dst: Frame) -> GetFrameTransformResponse:
         """Return the transform between two robot frames."""
         resp = self.call(RpcApiId.GET_FRAME_TRANSFORM, bytes(GetFrameTransformRequest(src=src, dst=dst)))
-        return GetFrameTransformResponse().parse(resp.payload)
+        return GetFrameTransformResponse.parse(resp.payload)
 
     # -- WebSocket video stream --
 
-    async def stream_video(self, callback: Callable[[bytes], Any]):
+    async def stream_video(self, callback: Callable[[bytes], Coroutine[Any, Any, None] | None]) -> None:
         """Stream JPEG frames from the robot's camera over WebSocket.
 
         Connects to ws://{ip}:{ws_port}, extracts JPEG frames from
@@ -210,13 +217,18 @@ class BoosterConnection:
 
     # -- lifecycle --
 
-    def close(self):
+    def close(self) -> None:
         """Close the underlying gRPC channel."""
         self.channel.close()
 
-    def __enter__(self):
+    def __enter__(self) -> BoosterConnection:
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> Literal[False]:
         self.close()
         return False
